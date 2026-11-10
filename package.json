@@ -1,6 +1,6 @@
 {
   "name": "@philomelcc/dsh-status-monitor",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Status monitor view for the DSH workbench: disk, hardware, ports and usage cards with a full-page zoom.",
   "license": "MIT",
