@@ -2572,10 +2572,28 @@ window.__ModuleLoader__.load({
     }
 
     return {
+      // `slots` only: the workbench is optional and resolved at apply time.
       inject: ['slots'],
       apply(ctx) {
-        const api = ctx.get('workbench');
-        if (api && api.apiVersion === 1) {
+        let mounted = false;
+
+        const standalone = () => {
+          if (mounted) return;
+          mounted = true;
+          // No workbench: publish the same pair the built-in panels use — a
+          // sidebar entry plus the page it opens.
+          wb = { tokens: STANDALONE_TOKENS };
+          ctx.effect(() => ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
+            name: 'sidebar.panellist', id: VIEW_ID, order: 20, label: '状态监控',
+          }, StatusIcon)), 'status-monitor: sidebar entry');
+          ctx.effect(() => ctx.slots.inject('main', () => ctx.slots.register(
+            { name: 'main', key: VIEW_ID }, StatusView,
+          )), 'status-monitor: main view');
+        };
+
+        const useWorkbench = (api) => {
+          if (mounted || !api || api.apiVersion !== 1) return;
+          mounted = true;
           wb = api;
           ctx.effect(() => api.registerView({
             id: VIEW_ID,
@@ -2585,17 +2603,13 @@ window.__ModuleLoader__.load({
             component: StatusView,
             order: 20,
           }), 'status-monitor: view');
-          return;
-        }
-        // No workbench: publish the same pair the built-in panels use — a
-        // sidebar entry plus the page it opens.
-        wb = { tokens: STANDALONE_TOKENS };
-        ctx.effect(() => ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
-          name: 'sidebar.panellist', id: VIEW_ID, order: 20, label: '状态监控',
-        }, StatusIcon)), 'status-monitor: sidebar entry');
-        ctx.effect(() => ctx.slots.inject('main', () => ctx.slots.register(
-          { name: 'main', key: VIEW_ID }, StatusView,
-        )), 'status-monitor: main view');
+        };
+
+        // The shell may apply after this module; wait briefly for its service
+        // before falling back to the standalone entry.
+        if (ctx.get('workbench')) { useWorkbench(ctx.get('workbench')); return; }
+        ctx.inject(['workbench'], (inner) => useWorkbench(inner.workbench));
+        ctx.timeout(() => { if (!mounted) standalone(); }, 1500);
       },
     };
   },
