@@ -7,27 +7,40 @@
   "author": "philomelcc",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/philomelcc/dsh-workbench.git",
-    "directory": "packages/status-monitor"
+    "url": "git+https://github.com/philomelcc/dsh-status-monitor.git"
   },
-  "homepage": "https://github.com/philomelcc/dsh-workbench#readme",
+  "homepage": "https://github.com/philomelcc/dsh-status-monitor#readme",
   "bugs": {
-    "url": "https://github.com/philomelcc/dsh-workbench/issues"
+    "url": "https://github.com/philomelcc/dsh-status-monitor/issues"
   },
-  "keywords": ["dsh", "deepseek-harness", "workbench", "status-monitor", "plugin"],
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "workbench",
+    "status-monitor",
+    "plugin"
+  ],
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
-  "files": ["index.js", "client.js", "cordis.patch.yml", "locale/*.json", "icon.svg"],
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
       "inject": [
