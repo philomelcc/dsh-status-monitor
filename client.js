@@ -2605,11 +2605,18 @@ window.__ModuleLoader__.load({
           }), 'status-monitor: view');
         };
 
-        // The shell may apply after this module; wait briefly for its service
-        // before falling back to the standalone entry.
-        if (ctx.get('workbench')) { useWorkbench(ctx.get('workbench')); return; }
-        ctx.inject(['workbench'], (inner) => useWorkbench(inner.workbench));
-        ctx.timeout(() => { if (!mounted) standalone(); }, 1500);
+        // The shell may apply after this module. Poll briefly for its service
+        // before falling back to the standalone entry — plain timers only, so
+        // this works in the client half's reduced context.
+        const startedAt = Date.now();
+        const waitForWorkbench = () => {
+          if (mounted) return;
+          const api = ctx.get('workbench');
+          if (api) { useWorkbench(api); return; }
+          if (Date.now() - startedAt > 1500) { standalone(); return; }
+          setTimeout(waitForWorkbench, 100);
+        };
+        waitForWorkbench();
       },
     };
   },
